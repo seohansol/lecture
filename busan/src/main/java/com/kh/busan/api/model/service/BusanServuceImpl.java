@@ -26,7 +26,7 @@ private final CommentMapper mapper;
 		   requestUrl += "&pageNo="+page;
 		   requestUrl += "&resultType=json";
 		   URI uri = null;
-		   System.out.println(requestUrl);
+		   //System.out.println(requestUrl);
 		   try {
 			   uri = new URI(requestUrl);
 		   } catch(URISyntaxException e) {
@@ -34,7 +34,7 @@ private final CommentMapper mapper;
 		   }
 		RestTemplate restTemplate = new RestTemplate();
 		String response = restTemplate.getForObject(uri, String.class);
-		System.out.println(response);
+		//System.out.println(response);
 		return response;
 	}
 
@@ -61,6 +61,9 @@ private final CommentMapper mapper;
 
 	@Override
 	public void save(CommentDTO comment) {
+		if(comment.getWriter().equals("") || comment.getContent().equals("")) {
+			System.out.println("예외욤");
+		}
 		mapper.save(comment);
 	}
 
