@@ -31,6 +31,7 @@ public class MemberServiceImpl implements MemberService {
 	private final MemberMapper memberMapper;
 	private final PasswordEncoder passwordEncoder;
 	
+	
 	@Override
 	public void save(MemberDTO requestMember) { // 일반 사용자용 가입 메소드
 		
@@ -69,6 +70,10 @@ public class MemberServiceImpl implements MemberService {
 		// 제 현재 비밀번호는 currentPassword구요
 		// 요게 맞다면 newPassword로 바꾸고싶어욤
 		
+		// 비번 검증해줄게!
+		Long userNo = passwordMatches(changeEntity.getCurrentPassword());
+		
+		/*
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		// 유저 정보 (
 		CustomUserDetails user =(CustomUserDetails)auth.getPrincipal();
@@ -76,18 +81,44 @@ public class MemberServiceImpl implements MemberService {
 		if(!(passwordEncoder.matches(changeEntity.getCurrentPassword(), user.getPassword()))) {
 			throw new MissmatchPasswordException("비번 틀림");
 		}
-		
+		*/
 		
 		String encodedPassword = passwordEncoder.encode(changeEntity.getNewPassword());
 		
 		Map<String, String> changeRequest = new HashMap();
-		changeRequest.put("userNo", String.valueOf(user.getUserNo()));
+		changeRequest.put("userNo", String.valueOf(userNo));
 		changeRequest.put("password", encodedPassword);
 		
 		memberMapper.changePassword(changeRequest);
 		
 		
 	}
+	
+	// 탈퇴다요
+	@Override
+	public void deleteByPassword(String password) {
+		
+		// 사용자가 입력한 비밀번호와 DB에 저장되어있는 비밀번호가 둘이 서로 같은지? 검증
+		Long userNo = passwordMatches(password);
+		
+		memberMapper.deleteByPassword(userNo);
+		
+	}
+	
+	// 비번 내가 검증해줄게~
+	private Long passwordMatches(String password) {
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		CustomUserDetails userDatails = (CustomUserDetails)auth.getPrincipal();
+		if(!passwordEncoder.matches(password, userDatails.getPassword())) {
+			throw new MissmatchPasswordException("비밀번호 달라요~");
+		}
+		return userDatails.getUserNo();
+	}
+	
+
+
+
 	
 	
 	

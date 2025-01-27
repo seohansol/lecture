@@ -3,6 +3,7 @@ package com.kh.secom.member.controller;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import com.kh.secom.member.model.service.MemberService;
 import com.kh.secom.member.model.vo.ChangePasswordDTO;
 import com.kh.secom.member.model.vo.LoginResponse;
 import com.kh.secom.member.model.vo.MemberDTO;
+import com.kh.secom.token.model.service.TokenService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class MemberController {
 
 	private final MemberService memberService;
 	private final AuthentlcationServiceImpl authService;
+	private final TokenService tokenService;
 
 	// 새롭게 데이터를 만들어내는 요청(INSERT) == POST
 	@PostMapping
@@ -38,7 +41,7 @@ public class MemberController {
 
 		return ResponseEntity.ok("회원가입에 성공했습니다.");
 	}
-
+	// 로그인 부분
 	@PostMapping("login")
 	public ResponseEntity<LoginResponse> login(@RequestBody MemberDTO requestMember) {
 
@@ -69,6 +72,23 @@ public class MemberController {
 		return ResponseEntity.ok("성공이다요");
 	}
 	
+	// 회원 탈퇴 기능
+	@DeleteMapping
+	public ResponseEntity<String> deleteByByPassword(@RequestBody Map<String, String> password){
+		
+		memberService.deleteByPassword(password.get("password"));
+		
+		return ResponseEntity.ok("삭제 완료!");
+	}
+	// 토큰 다시받기
+	@PostMapping("refresh")
+	public ResponseEntity<Map> refresh(@RequestBody Map<String, String> tokens){
+		String refreshToken = tokens.get("refreshToken");
+		
+		Map<String, String> newTokens = tokenService.refreshTokens(refreshToken);
+		
+		return ResponseEntity.ok(newTokens);
+	}
 	
 	
 	
